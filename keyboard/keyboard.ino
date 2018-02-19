@@ -100,7 +100,7 @@ void loop()
     }
   }
 
-  Wire.requestFrom(32, 1); //top buttons
+  Wire.requestFrom(32, 1); //top button //key 1 - 8
   if (Wire.available())
   {
     /* leftShift = ~Wire.read();
@@ -131,12 +131,11 @@ void loop()
   }
 
   // bottom
-  Wire.requestFrom(33, 1); //bottom buttons
+  Wire.requestFrom(33, 1); //bottom buttons ex. [left button,right button,space bar left and right]
   if (Wire.available())
   {
     byte readKey2 = bitMap2(~Wire.read());
     if (readKey2 < min_key2 && readKey2 == 0) { //on release key
-
       //  Serial.println(min_key2,HEX);
       Serial.write(0xff);
       Serial.write(0xff);
@@ -152,6 +151,7 @@ void loop()
     }
 
   }
+  //---sending---//
 }
 byte bitMaping(byte data) {
   byte DataOutput = 0;

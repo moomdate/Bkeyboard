@@ -23,8 +23,10 @@ int cen1 = 2;
 int cen2 = 3;
 int HV_en = 12;
 
+byte readKey2, readKey;
 byte leftShift, rightShitf;
 byte min_key = 0, min_key2 = 0;
+int sum_key = 0;
 int c1, c2, c3, c4, c5, c6;
 int temp = 0;
 
@@ -103,55 +105,44 @@ void loop()
   Wire.requestFrom(32, 1); //top button //key 1 - 8
   if (Wire.available())
   {
-    /* leftShift = ~Wire.read();
-      leftShift = (bitMaping(leftShift));
-
-      Serial.print(leftShift, DEC);
-      //  Serial.println();*/
-    byte data = 0;
-    data = bitMaping(~Wire.read());
-    // data = bitMaping(~Wire.read());
-    if (data < min_key && data == 0) { //on release key
-      Serial.write(0xff);
-      Serial.write(0xff);
-      Serial.write(0xa6);
-      Serial.write(0x03);
-      Serial.write(min_key);
-      Serial.write(00);
-      Serial.write(00);
-      delay(100);
-      // Serial.print("Release:");
-      // Serial.println(min_key, HEX);
-      min_key = 0;
-    }
-    if (data >= min_key) {
-      min_key = data;
+    readKey = bitMaping(~Wire.read());
+    if (readKey >= min_key) {
+      min_key = readKey;
     }
     //   Serial.println(data, HEX);
   }
-
-  // bottom
   Wire.requestFrom(33, 1); //bottom buttons ex. [left button,right button,space bar left and right]
   if (Wire.available())
   {
-    byte readKey2 = bitMap2(~Wire.read());
-    if (readKey2 < min_key2 && readKey2 == 0) { //on release key
-      //  Serial.println(min_key2,HEX);
-      Serial.write(0xff);
-      Serial.write(0xff);
-      Serial.write(0xa6);
-      Serial.write(0x03);
-      Serial.write(00);
-      Serial.write(min_key2);
-      Serial.write(00);
-      min_key2 = 0;
-    }
-    if (readKey2 >= min_key2) {  //
+    readKey2 = bitMap2(~Wire.read());
+
+    if (readKey2 >= min_key2) {
       min_key2 = readKey2;
     }
-
   }
+  /*if (readKey2 < min_key2 && readKey2 == 0) { //on release key   [left button,right button,space bar left and right]
+    release1 = true;
+    //  Serial.println(min_key2,HEX);
+    }
+    if (readKey < min_key && readKey == 0) { //on release key 1-8
+    release2 = true;
+    }*/
   //---sending---//
+  sum_key = min_key2 + min_key;
+  if (readKey2 == 0 && readKey == 0 && sum_key != 0) { // release two shift
+    Serial.write(0xff);
+    Serial.write(0xff);
+    Serial.write(0xa6);
+    Serial.write(0x03);
+    Serial.write(min_key);
+    Serial.write(min_key2);
+    Serial.write(00);
+    min_key2 = 0;
+    min_key = 0;
+    sum_key = 0;
+    // Serial.println("Max");
+  }
+
 }
 byte bitMaping(byte data) {
   byte DataOutput = 0;
@@ -174,9 +165,6 @@ byte bitMaping(byte data) {
 
   bit_0 == HIGH ? bitSet(DataOutput, 6) :  bitClear(DataOutput, 6);
   bit_7 == HIGH ? bitSet(DataOutput, 7) :  bitClear(DataOutput, 7);
-  /*  bit_1 ? bitSet(DataOutput, 1) :  bitClear(DataOutput, 1);
-    bit_2 ? bitSet(DataOutput, 2) :  bitClear(DataOutput, 2);
-    bit_3 ? bitSet(DataOutput, 3) :  bitClear(DataOutput, 3);*/
   return DataOutput;
 }
 byte bitMap2(byte dataInput) {

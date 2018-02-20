@@ -29,7 +29,7 @@ byte min_key = 0, min_key2 = 0;
 int sum_key = 0;
 int c1, c2, c3, c4, c5, c6;
 int temp = 0;
-
+int bufferKey2digit[2] = {0};
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
@@ -50,7 +50,7 @@ void setup()
   digitalWrite(HV_en, HIGH);
   tc1 = 0x00;
   tc2 = 0x00;
-  Serial.println("ready");
+  //Serial.println("ready");
 }
 void loop()
 {

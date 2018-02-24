@@ -64,7 +64,7 @@ void loop()
     Serial.print(" ");
     Serial.print(digitalRead(D_1)); //ขวา
     Serial.println();*/
-  byte j2_1 = digitalRead(A_1); //right
+  byte j2_1 = digitalRead(A_1); //right joy
   byte j2_2 = digitalRead(B_1);
   byte j2_3 = digitalRead(C_1);
   byte j2_4 = digitalRead(D_1);
@@ -75,7 +75,7 @@ void loop()
   j2_4 == LOW ? bitSet(rightJoy, 3) :  bitClear(rightJoy, 3);
   push_r == LOW ? bitSet(rightJoy, 1) :  bitClear(rightJoy, 1);
 
-  byte j1_1 = digitalRead(A_2); //left
+  byte j1_1 = digitalRead(A_2); //left joy
   byte j1_2 = digitalRead(B_2);
   byte j1_3 = digitalRead(C_2);
   byte j1_4 = digitalRead(D_2);

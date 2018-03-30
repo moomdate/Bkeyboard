@@ -24,9 +24,11 @@ int cen2 = 3;
 int HV_en = 12;
 
 byte readKey2, readKey;
+byte readCur1, readCur2, readCur3, readCur4;
 byte leftShift, rightShitf;
 byte min_key = 0, min_key2 = 0;
-int sum_key = 0;
+byte cur_key1 = 0, cur_key2 = 0, cur_key3 = 0, cur_key3_5 = 0 , cur_key4 = 0, release_cersor = 0;
+int sum_key = 0, sum_cursorkey1 = 0;
 int c1, c2, c3, c4, c5, c6;
 int temp = 0;
 
@@ -120,11 +122,112 @@ void loop()
   if (Wire.available())
   {
     readKey2 = bitMap2(~Wire.read());
-
     if (readKey2 >= min_key2) {
       min_key2 = readKey2;
     }
   }
+
+
+  //------------------------------------cursor key--------------------------
+  Wire.requestFrom(34, 1);
+  if (Wire.available())
+  {
+    readCur1 = (~Wire.read());
+    if (readCur1 >= cur_key1) {
+      cur_key1 = readCur1;
+    }
+  }
+
+
+  Wire.requestFrom(35, 1);
+  if (Wire.available())
+  {
+    readCur2 = (~Wire.read());
+    if (readCur2 >= cur_key2) {
+      cur_key2 = readCur2;
+    }
+  }
+
+  Wire.requestFrom(36, 1);
+  if (Wire.available())
+  {
+    readCur3 = (~Wire.read());
+    if (readCur3 >= cur_key3_5) {
+      cur_key3_5 = readCur3;
+    }
+  }
+
+  Wire.requestFrom(37, 1);
+  if (Wire.available())
+  {
+    readCur4 = (~Wire.read());
+    if (readCur4 >= cur_key4) {
+      cur_key4 = readCur4;
+    }
+  }
+  if (cur_key2 >= 8) {
+    cur_key3 = cur_key2 / 8; //chip key 2
+    cur_key2 = 0;
+  }
+
+  //release cursor key
+  sum_cursorkey1 = cur_key1 + cur_key2 * 32;
+  if (readCur1 == 0 && readCur2 == 0 && sum_cursorkey1 != 0) { // set1 chip 1 and 2
+    /* Serial.write(sum_cursorkey1);
+      cur_key1 = 0;
+       cur_key2 = 0;*/
+    release_cersor = 1;
+  }
+  if (readCur2 == 0 && cur_key3 != 0) { //set 2 chip 2
+    /* Serial.println(cur_key3, HEX);
+      cur_key3 = 0;*/
+    release_cersor = 1;
+
+  }
+  if (readCur4 == 0 && cur_key4 != 0) {
+    if (cur_key4 == 1) {
+      cur_key3_5 = 32;
+      cur_key4 = 0;
+    }
+  }
+  if (readCur3 == 0 && cur_key3_5 != 0) { //set 2 chip 3
+    /*Serial.println(cur_key3_5 * 4, HEX);
+      cur_key3_5 = 0;*/
+    release_cersor = 1;
+  }
+  if (readCur4 == 0 && cur_key4 != 0 && cur_key4 != 1) { //set 3 chip 4
+    /* Serial.println(cur_key4 / 2, HEX);
+      cur_key4 = 0;*/
+    release_cersor = 1;
+  }
+  if (release_cersor) {
+    release_cersor = 0;
+    Serial.write(0xff);
+    Serial.write(0xff);
+    Serial.write(0xa4);
+    Serial.write(0x03);
+    Serial.write(sum_cursorkey1);
+    Serial.write(cur_key3 + cur_key3_5 * 4);
+    Serial.write(cur_key4 / 2);
+    cur_key1 = 0;
+    cur_key2 = 0;
+    cur_key3 = 0;
+    cur_key3_5 = 0;
+    cur_key4 = 0;
+  }
+  /*if ((readCur1 == 0 && readCur2 == 0  && readCur3 == 0  && readCur4 == 0) && sum_cursorkey1 != 0){
+    Serial.println(sum_cursorkey1, HEX);
+    cur_key1 = 0;
+    cur_key2 = 0;
+    }*/
+  /*  if (readCur2 == 0 && cur_key2 != 0 && cur_key2 < 8) { //if chip 2 key 1-3 is true
+      Serial.println(cur_key2 * 32, HEX);
+      cur_key2 = 0;
+    } else if (readCur2 == 0 && cur_key2 != 0 ) { //clear cur_key2
+      cur_key2 = 0;
+    }
+  */
+
   /*if (readKey2 < min_key2 && readKey2 == 0) { //on release key   [left button,right button,space bar left and right]
     release1 = true;
     //  Serial.println(min_key2,HEX);

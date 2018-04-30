@@ -1,4 +1,4 @@
-int count = 0;
+  int count = 0;
 int same = 0;
 int tc1, tc2;
 #include <Wire.h>
@@ -108,14 +108,13 @@ void loop()
       delay(5);
     }
   }
-
   Wire.requestFrom(32, 1); //top button //key 1 - 8
   if (Wire.available())
   {
     readKey = bitMaping(~Wire.read());
     if (readKey >= min_key) {
       min_key = readKey;
-    }
+    }//com
     //   Serial.println(data, HEX);
   }
   Wire.requestFrom(33, 1); //bottom buttons ex. [left button,right button,space bar left and right]

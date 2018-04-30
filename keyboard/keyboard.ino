@@ -35,7 +35,7 @@ int temp = 0;
 boolean hiV = 1;
 unsigned long previousMillis = 0;
 const long interval = 60000;
-const long interval2 = 1000;
+const long interval2 = 3000;
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)

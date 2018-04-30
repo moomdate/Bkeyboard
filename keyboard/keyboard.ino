@@ -121,6 +121,8 @@ void loop()
       Serial.write(leftJoy);
       Serial.write(rightJoy);
     }
+     previousMillis = currentMillis;
+     hiV = 1;
     while (digitalRead(A_1) == 0 || digitalRead(B_1) == 0 || digitalRead(C_1) == 0 || digitalRead(D_1) == 0 || digitalRead(cen1) == 0) { //joystick right debounce
       delay(5);
     }

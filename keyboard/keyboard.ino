@@ -1,4 +1,4 @@
-  int count = 0;
+int count = 0;
 int same = 0;
 int tc1, tc2;
 #include <Wire.h>
@@ -32,6 +32,10 @@ int sum_key = 0, sum_cursorkey1 = 0;
 int c1, c2, c3, c4, c5, c6;
 int temp = 0;
 
+boolean hiV = 1;
+unsigned long previousMillis = 0;
+const long interval = 60000;
+const long interval2 = 1000;
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
@@ -49,7 +53,7 @@ void setup()
   pinMode(cen1, INPUT_PULLUP); //ขวา
   pinMode(cen2, INPUT_PULLUP); //ซ้าย
   pinMode(HV_en, OUTPUT);
-  digitalWrite(HV_en, HIGH);
+  digitalWrite(HV_en, hiV);
   tc1 = 0x00;
   tc2 = 0x00;
   //Serial.println("ready");
@@ -57,6 +61,22 @@ void setup()
 void loop()
 {
   //top
+
+  //****************hight volt*****************
+  unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= interval) {
+   // Serial.println("HIGHT VOLT ON 1 SEC");
+    hiV = 1;
+    if (currentMillis - previousMillis >= (interval + interval2)) {
+     // Serial.println("HIGHT VOLT OFF");
+      hiV = 0;
+      previousMillis = currentMillis;
+    }
+
+  }
+  digitalWrite(HV_en, hiV);
+  /////////////////////////////////////////////
   byte rightJoy = 0, leftJoy = 0;
   /* Serial.print(digitalRead(A_1)); //ขึ้น
     Serial.print(" ");
@@ -213,6 +233,10 @@ void loop()
     cur_key3 = 0;
     cur_key3_5 = 0;
     cur_key4 = 0;
+    //--------- hight volt ---------
+    previousMillis = currentMillis;
+    hiV = 1;
+    //------------------------------
   }
   /*if ((readCur1 == 0 && readCur2 == 0  && readCur3 == 0  && readCur4 == 0) && sum_cursorkey1 != 0){
     Serial.println(sum_cursorkey1, HEX);
@@ -247,6 +271,10 @@ void loop()
     min_key2 = 0;
     min_key = 0;
     sum_key = 0;
+    //--------- hight volt ---------
+    previousMillis = currentMillis;
+    hiV = 1;
+    //------------------------------
     // Serial.println("Max");
   }
 

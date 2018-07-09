@@ -160,7 +160,7 @@ void chargStatBeepSound() {
   } else {
     if (toggleBeep) {
       beep();
-      delay(100);
+      delay(50);
       beep();
       toggleBeep = 0;
     }

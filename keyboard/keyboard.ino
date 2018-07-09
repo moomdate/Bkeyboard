@@ -39,8 +39,8 @@ float min_ = 4.2, max_ = 0.0;
 int stateReleaseHold = 0;
 boolean hiV = 1;
 unsigned long previousMillis = 0;
-const long interval = 60000;
-const long interval2 = 3000;
+const long interval = 60000; //เวลาทีเช็ค sleep high vold ทุกๆ 1 นาที
+const long interval2 = 3000; //charg high volt
 int time_ = 0;
 byte toggleBeep = 0;
 
@@ -204,10 +204,10 @@ void loop()
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     hiV = 1;
-    Serial.println("HHH");
+    //Serial.println("HHH");
     if (currentMillis - previousMillis >= (interval + interval2)) {
       hiV = 0;
-       Serial.println("OO");
+       //Serial.println("OO");
       previousMillis = currentMillis;
     }
   }

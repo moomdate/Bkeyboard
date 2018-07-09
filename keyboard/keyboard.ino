@@ -22,7 +22,9 @@ int D_2 = 11;
 int cen1 = 2;
 int cen2 = 3;
 int HV_en = 12;
-
+int checkBatCharging = 0;
+int ccFill = 0;
+int arrayFofill[3];
 byte readKey2, readKey;
 byte readCur1, readCur2, readCur3, readCur4;
 byte leftShift, rightShitf;
@@ -31,11 +33,18 @@ byte cur_key1 = 0, cur_key2 = 0, cur_key3 = 0, cur_key3_5 = 0 , cur_key4 = 0, re
 int sum_key = 0, sum_cursorkey1 = 0;
 int c1, c2, c3, c4, c5, c6;
 int temp = 0;
-
+byte headCom = 0;
+int timeCheck = 0;
+float min_ = 4.2, max_ = 0.0;
+int stateReleaseHold = 0;
 boolean hiV = 1;
 unsigned long previousMillis = 0;
 const long interval = 60000;
 const long interval2 = 3000;
+int time_ = 0;
+byte toggleBeep = 0;
+
+byte toggleBeepU = 0;
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
@@ -56,27 +65,152 @@ void setup()
   digitalWrite(HV_en, hiV);
   tc1 = 0x00;
   tc2 = 0x00;
+  pinMode(13, OUTPUT); // sound
+  pinMode(A0, INPUT);
+  pinMode(A2, INPUT); // chart state
+  startSound();
   //Serial.println("ready");
+}
+void toggleStateCharing() {
+
+}
+void errorSound() {
+  fr(100, 90, 100);
+  delay(100);
+  fr(100, 90, 100);
+  delay(100);
+}
+void beep() {
+  fr(400, 90, 100);
+}
+void errorBreak() {
+  fr(100, 90, 100);
+  delay(60);
+  fr(100, 90, 100);
+  delay(60);
+  fr(600, 90, 100);
+  delay(50);
+}
+void beepbeep() {
+  fr(100, 600, 300);
+  delay(100);
+  fr(150, 600, 320);
+  delay(100);
+}
+void startSound() {
+  fr(300, 100, 200);
+  delay(100);
+  fr(500, 100, 200);
+  delay(100);
+}
+void fr(int gg, int cc, int fg) {
+  int ab = gg;
+  while (ab) {
+    digitalWrite(13, 1);
+    delayMicroseconds(cc);
+    analogWrite(13, 0);
+    delayMicroseconds(fg);
+    ab--;
+  }
+}
+int voltV() {
+  float vin;
+  float av = 0.0;
+  vin = analogRead(A0);
+  vin = vin * 5.0;
+  vin = (vin / 1023) * 3.0;
+  time_++;
+  if (time_ > 300) {
+    time_ = 0;
+    min_ = 4.2;
+    max_ = 0.0;
+  }
+  if (min_ > vin)
+    min_ = vin;
+  if (max_ < vin)
+    max_ = vin;
+  av = (min_ + max_) / 2.0;
+  //av = map(2.7,4.2,0,4.2);
+  av = av - 2.7;
+  float percent = av * 100.0 / (4.19 - 2.7);
+
+  return ceil(percent);
+}
+void chargStatBeepSound() {
+  float gg = analogRead(A2);  //check charging
+  //ccFill = 0;
+
+  if (gg) {
+    arrayFofill[ccFill] = gg;
+    checkBatCharging++;
+    if (checkBatCharging > 50) {
+      checkBatCharging = 0;
+      ccFill++;
+    }
+    if (ccFill == 3) {
+      //Serial.println(fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]));
+      if (fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]) > 2) {
+        if (toggleBeep == 0)
+          toggleBeep = 1;
+        //beep();
+      }
+      ccFill = 0;
+      checkBatCharging = 0;
+    }
+  } else {
+    if (toggleBeep) {
+      beep();
+      delay(100);
+      beep();
+      toggleBeep = 0;
+    }
+  }
+  if (toggleBeep == 1) { //chart
+    beep();
+    toggleBeep = 2;
+  }
+}
+int fillter(int a, int b, int c) {
+  return (a + b + c ) / 3;
+
+}
+void SerialComm() {
+  if (Serial.available()) {
+    byte data = Serial.read();
+    if (data == 155) {
+      errorSound();
+    } else if (data == 154) {
+      beep();
+    } else if (data == 153) {
+      beepbeep();
+    } else if (data == 152) {
+      errorSound();
+    } else if (data == 151) {
+      errorBreak();
+    } else if (data == 150) { //battery
+      Serial.write(voltV());
+      //Serial.write(0xFA);
+    }
+    data = 0;
+  }
 }
 void loop()
 {
   //top
-
+  //Serial.println(voltV());
+  chargStatBeepSound();
+  SerialComm();
   //****************hight volt*****************
   unsigned long currentMillis = millis();
-
   if (currentMillis - previousMillis >= interval) {
-   // Serial.println("HIGHT VOLT ON 1 SEC");
     hiV = 1;
     if (currentMillis - previousMillis >= (interval + interval2)) {
-     // Serial.println("HIGHT VOLT OFF");
       hiV = 0;
       previousMillis = currentMillis;
     }
-
   }
   digitalWrite(HV_en, hiV);
-  /////////////////////////////////////////////
+
   byte rightJoy = 0, leftJoy = 0;
   /* Serial.print(digitalRead(A_1)); //ขึ้น
     Serial.print(" ");
@@ -107,28 +241,59 @@ void loop()
   j1_3 == LOW ? bitSet(leftJoy, 0) :  bitClear(leftJoy, 0);
   j1_4 == LOW ? bitSet(leftJoy, 6) :  bitClear(leftJoy, 6);
   push_l == LOW ? bitSet(leftJoy, 4) :  bitClear(leftJoy, 4);
-
   if (j2_1 == 0 || j2_2 == 0 || j2_3 == 0 || j2_4 == 0 || push_r == 0    || j1_1 == 0 || j1_2 == 0 || j1_3 == 0 || j1_4 == 0 || push_l == 0) {
-    Serial.write(0xff);
-    Serial.write(0xff);
-    Serial.write(0xa6);
-    Serial.write(0x03);
-    Serial.write(00);
-    if (leftJoy == 01) {
-      Serial.write(rightJoy);
-      Serial.write(leftJoy);
-    } else {
-      Serial.write(leftJoy);
-      Serial.write(rightJoy);
-    }
-     previousMillis = currentMillis;
-     hiV = 1;
+    timeCheck = 0;
+    stateReleaseHold = 0;
     while (digitalRead(A_1) == 0 || digitalRead(B_1) == 0 || digitalRead(C_1) == 0 || digitalRead(D_1) == 0 || digitalRead(cen1) == 0) { //joystick right debounce
+      timeCheck++;
+      if (timeCheck > 140) { // check hold button
+        timeCheck = 0;
+        stateReleaseHold = 1;
+        break;
+      }
+      stateReleaseHold = 2;
       delay(5);
     }
     while (digitalRead(A_2) == 0 || digitalRead(B_2) == 0 || digitalRead(C_2) == 0 || digitalRead(D_2) == 0 || digitalRead(cen2) == 0) { //joystick left debounce
+      timeCheck++;
+      if (timeCheck > 140) { // check hold button
+        timeCheck = 0;
+        stateReleaseHold = 1;
+        break;
+      }
+      stateReleaseHold = 2;
       delay(5);
     }
+    if (stateReleaseHold) {
+      Serial.write(0xff);
+      Serial.write(0xff);
+      Serial.write(0xa6);
+      Serial.write(0x03);
+      Serial.write(00);
+      if (leftJoy == 01) {
+        Serial.write(rightJoy);
+        Serial.write(leftJoy);
+      } else {
+        Serial.write(leftJoy);
+        Serial.write(rightJoy);
+      }
+    } else if (stateReleaseHold != 2) {
+      Serial.write(0xff);
+      Serial.write(0xff);
+      Serial.write(0xa6);
+      Serial.write(0x03);
+      Serial.write(00);
+      if (leftJoy == 01) {
+        Serial.write(rightJoy);
+        Serial.write(leftJoy);
+      } else {
+        Serial.write(leftJoy);
+        Serial.write(rightJoy);
+      }
+    }
+    previousMillis = currentMillis;
+    hiV = 1;
+
   }
   Wire.requestFrom(32, 1); //top button //key 1 - 8
   if (Wire.available())

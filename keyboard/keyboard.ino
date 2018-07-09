@@ -204,8 +204,10 @@ void loop()
   unsigned long currentMillis = millis();
   if (currentMillis - previousMillis >= interval) {
     hiV = 1;
+    Serial.println("HHH");
     if (currentMillis - previousMillis >= (interval + interval2)) {
       hiV = 0;
+       Serial.println("OO");
       previousMillis = currentMillis;
     }
   }

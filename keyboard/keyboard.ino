@@ -147,7 +147,8 @@ void chargStatBeepSound() {
       checkBatCharging = 0;
       ccFill++;
     }
-    if (ccFill == 3) {
+
+    if (ccFill >= 3) {
       //Serial.println(fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]));
       if (fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]) > 2) {
         if (toggleBeep == 0)
@@ -157,15 +158,32 @@ void chargStatBeepSound() {
       ccFill = 0;
       checkBatCharging = 0;
     }
-  } else {
-    if (toggleBeep) {
-      beep();
-      delay(50);
-      beep();
-      toggleBeep = 0;
+  }
+  if (!gg) {
+    arrayFofill[ccFill] = gg;
+    checkBatCharging++;
+    if (checkBatCharging > 10) {
+      checkBatCharging = 0;
+      ccFill++;
+    }
+
+    if (ccFill >= 3) {
+      //erial.println(fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]));
+      if (fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]) == 0) {
+        if (toggleBeep == 2) {
+          toggleBeep = 0;
+          beep();
+          delay(100);
+          beep();
+          //Serial.println("B");
+        }
+      }
+      ccFill = 0;
+      checkBatCharging = 0;
     }
   }
-  if (toggleBeep == 1) { //chart
+  if (toggleBeep == 1) { //chart.
+    //Serial.println("A");
     beep();
     toggleBeep = 2;
   }
@@ -207,7 +225,8 @@ void loop()
     //Serial.println("HHH");
     if (currentMillis - previousMillis >= (interval + interval2)) {
       hiV = 0;
-       //Serial.println("OO");
+      //Serial.println("OO");
+      //errorBreak();
       previousMillis = currentMillis;
     }
   }

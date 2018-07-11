@@ -1,16 +1,4 @@
-int count = 0;
-int same = 0;
-int tc1, tc2;
 #include <Wire.h>
-//const int J1X = A0;
-//int J1X_Val = 0;
-//const int J1Y = A1;
-//int J1Y_Val = 0;
-//
-//const int J2X = A2;
-//int J2X_Val = 0;
-//const int J2Y = A3;
-//int J2Y_Val = 0;
 int A_1 = 4;
 int B_1 = 5;
 int C_1 = 6;
@@ -22,29 +10,36 @@ int D_2 = 11;
 int cen1 = 2;
 int cen2 = 3;
 int HV_en = 12;
+
+//--------------- charging ----------
 int checkBatCharging = 0;
 int ccFill = 0;
 int arrayFofill[3];
+int timeCheck = 0;
+float min_ = 4.2, max_ = 0.0;
+////////////////////////////////////
+
+//--------keyboard and cursor -------
 byte readKey2, readKey;
 byte readCur1, readCur2, readCur3, readCur4;
 byte leftShift, rightShitf;
 byte min_key = 0, min_key2 = 0;
 byte cur_key1 = 0, cur_key2 = 0, cur_key3 = 0, cur_key3_5 = 0 , cur_key4 = 0, release_cersor = 0;
 int sum_key = 0, sum_cursorkey1 = 0;
-int c1, c2, c3, c4, c5, c6;
-int temp = 0;
-byte headCom = 0;
-int timeCheck = 0;
-float min_ = 4.2, max_ = 0.0;
 int stateReleaseHold = 0;
+/////////////////////////////////////
+
+//-----------------beep -------------------
+int time_ = 0;
+byte toggleBeep = 0;
+byte toggleBeepU = 0;
+///////////////////////////////////////////
+//--------------- hight Volt----------------
 boolean hiV = 1;
 unsigned long previousMillis = 0;
 const long interval = 60000; //เวลาทีเช็ค sleep high vold ทุกๆ 1 นาที
 const long interval2 = 3000; //charg high volt
-int time_ = 0;
-byte toggleBeep = 0;
-
-byte toggleBeepU = 0;
+////////////////////////////////////////////
 void setup()
 {
   Wire.begin();        // join i2c bus (address optional for master)
@@ -63,16 +58,10 @@ void setup()
   pinMode(cen2, INPUT_PULLUP); //ซ้าย
   pinMode(HV_en, OUTPUT);
   digitalWrite(HV_en, hiV);
-  tc1 = 0x00;
-  tc2 = 0x00;
   pinMode(13, OUTPUT); // sound
   pinMode(A0, INPUT);
   pinMode(A2, INPUT); // chart state
   startSound();
-  //Serial.println("ready");
-}
-void toggleStateCharing() {
-
 }
 void errorSound() {
   fr(100, 90, 100);
@@ -147,7 +136,6 @@ void chargStatBeepSound() {
       checkBatCharging = 0;
       ccFill++;
     }
-
     if (ccFill >= 3) {
       //Serial.println(fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]));
       if (fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]) > 2) {
@@ -166,7 +154,6 @@ void chargStatBeepSound() {
       checkBatCharging = 0;
       ccFill++;
     }
-
     if (ccFill >= 3) {
       //erial.println(fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]));
       if (fillter(arrayFofill[0], arrayFofill[1], arrayFofill[2]) == 0) {

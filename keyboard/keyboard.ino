@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <EEPROM.h>
 int A_1 = 4;
 int B_1 = 5;
 int C_1 = 6;
@@ -28,7 +29,7 @@ byte cur_key1 = 0, cur_key2 = 0, cur_key3 = 0, cur_key3_5 = 0 , cur_key4 = 0, re
 int sum_key = 0, sum_cursorkey1 = 0;
 int stateReleaseHold = 0;
 /////////////////////////////////////
-
+boolean beep__ = false;
 //-----------------beep -------------------
 int time_ = 0;
 byte toggleBeep = 0;
@@ -62,6 +63,13 @@ void setup()
   pinMode(A0, INPUT); // volt value
   pinMode(A2, INPUT); // chart state
   startSound();
+  beep__ = ReadStatusBeep();
+}
+void errorSound2() {
+  fr(100, 90, 100);
+  delay(100);
+  fr(100, 80, 80);
+  delay(100);
 }
 void errorSound() {
   fr(100, 90, 100);
@@ -95,12 +103,14 @@ void startSound() {
 //---------- beep gen----------
 void fr(int gg, int cc, int fg) {
   int ab = gg;
-  while (ab) {
-    digitalWrite(13, 1);
-    delayMicroseconds(cc);
-    analogWrite(13, 0);
-    delayMicroseconds(fg);
-    ab--;
+  if (beep__) {
+    while (ab) {
+      digitalWrite(13, 1);
+      delayMicroseconds(cc);
+      analogWrite(13, 0);
+      delayMicroseconds(fg);
+      ab--;
+    }
   }
 }
 //----------analog volt to percent------------
@@ -178,6 +188,34 @@ void chargStatBeepSound() {
     toggleBeep = 2;
   }
 }
+//-----------------------beep manage-----------------------
+//EEPROM address 0 use for beep status
+//
+//////////////////////////////////////////////////////////
+int muteBeep(byte status__) { // status 1, 0
+  // value = EEPROM.read(0);
+  int ggBB = 0;
+  if (status__ == 0) {
+    beep__ = 1;
+    beep();
+    delay(50);
+    beep();
+  } else if (status__ == 1) {
+    beep__ = 1;
+    beep();
+  }
+  if (status__ == 1 || status__ == 0) {
+    EEPROM.write(0, status__);
+    beep__ = status__;
+    ggBB = status__;
+  }
+  return ggBB;
+}
+
+int ReadStatusBeep() {
+  int aaa = EEPROM.read(0);
+  return aaa;
+}
 int fillter(int a, int b, int c) {
   return (a + b + c ) / 3;
 
@@ -193,12 +231,16 @@ void SerialComm() {
     } else if (data == 153) {
       beepbeep();
     } else if (data == 152) {
-      errorSound();
+      errorSound2();
     } else if (data == 151) {
       errorBreak();
     } else if (data == 150) { //battery
       Serial.write(voltV());
       //Serial.write(0xFA);
+    } else if (data == 149) {
+      Serial.write(muteBeep(1));
+    } else if (data == 148) {
+      Serial.write(muteBeep(0));
     }
     data = 0;
   }
@@ -233,7 +275,7 @@ void loop()
     Serial.print(" ");
     Serial.print(digitalRead(D_1)); //ขวา
     Serial.println();*/
-    //----- check bit----
+  //----- check bit----
   byte j2_1 = digitalRead(A_1); //right joy
   byte j2_2 = digitalRead(B_1);
   byte j2_3 = digitalRead(C_1);
@@ -439,7 +481,7 @@ void loop()
     // Serial.println("Max");
   }
 
-} 
+}
 //------------ bit mapping to braille unicode---------------
 byte bitMaping(byte data) {
   byte DataOutput = 0;

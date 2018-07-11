@@ -13,9 +13,9 @@
     dec:153 -> Output:beeeep beeep (เสียงต่ำ)
     dec:152 -> Output:beep bep
     dec:151 -> Output:beep beep beeep
-    dec:150 -> volt status 
-            Output:percent battery (0-100)%
+    dec:150 -> Battery status 
+               Output:percent battery Hex:(0-100)%
     dec:149 -> unmute
-            Output:beep
+               Output:beep
     dec:148 -> mute
-            Output:beep beep
+               Output:beep beep

@@ -59,7 +59,7 @@ void setup()
   pinMode(HV_en, OUTPUT);
   digitalWrite(HV_en, hiV);
   pinMode(13, OUTPUT); // sound
-  pinMode(A0, INPUT);
+  pinMode(A0, INPUT); // volt value
   pinMode(A2, INPUT); // chart state
   startSound();
 }
@@ -92,6 +92,7 @@ void startSound() {
   fr(500, 100, 200);
   delay(100);
 }
+//---------- beep gen----------
 void fr(int gg, int cc, int fg) {
   int ab = gg;
   while (ab) {
@@ -102,6 +103,7 @@ void fr(int gg, int cc, int fg) {
     ab--;
   }
 }
+//----------analog volt to percent------------
 int voltV() {
   float vin;
   float av = 0.0;
@@ -125,6 +127,7 @@ int voltV() {
 
   return ceil(percent);
 }
+//------- beep when charging and unplug------------
 void chargStatBeepSound() {
   float gg = analogRead(A2);  //check charging
   //ccFill = 0;
@@ -179,6 +182,7 @@ int fillter(int a, int b, int c) {
   return (a + b + c ) / 3;
 
 }
+//----------------command for stm32------------------------
 void SerialComm() {
   if (Serial.available()) {
     byte data = Serial.read();
@@ -207,6 +211,7 @@ void loop()
   SerialComm();
   //****************hight volt*****************
   unsigned long currentMillis = millis();
+  //---------------- check time for sleep hight volt---------------
   if (currentMillis - previousMillis >= interval) {
     hiV = 1;
     //Serial.println("HHH");
@@ -228,6 +233,7 @@ void loop()
     Serial.print(" ");
     Serial.print(digitalRead(D_1)); //ขวา
     Serial.println();*/
+    //----- check bit----
   byte j2_1 = digitalRead(A_1); //right joy
   byte j2_2 = digitalRead(B_1);
   byte j2_3 = digitalRead(C_1);
@@ -254,7 +260,7 @@ void loop()
     stateReleaseHold = 0;
     while (digitalRead(A_1) == 0 || digitalRead(B_1) == 0 || digitalRead(C_1) == 0 || digitalRead(D_1) == 0 || digitalRead(cen1) == 0) { //joystick right debounce
       timeCheck++;
-      if (timeCheck > 140) { // check hold button
+      if (timeCheck > 140) {  // debounce switch
         timeCheck = 0;
         stateReleaseHold = 1;
         break;
@@ -264,7 +270,7 @@ void loop()
     }
     while (digitalRead(A_2) == 0 || digitalRead(B_2) == 0 || digitalRead(C_2) == 0 || digitalRead(D_2) == 0 || digitalRead(cen2) == 0) { //joystick left debounce
       timeCheck++;
-      if (timeCheck > 140) { // check hold button
+      if (timeCheck > 140) { // debounce switch
         timeCheck = 0;
         stateReleaseHold = 1;
         break;
@@ -413,27 +419,7 @@ void loop()
     hiV = 1;
     //------------------------------
   }
-  /*if ((readCur1 == 0 && readCur2 == 0  && readCur3 == 0  && readCur4 == 0) && sum_cursorkey1 != 0){
-    Serial.println(sum_cursorkey1, HEX);
-    cur_key1 = 0;
-    cur_key2 = 0;
-    }*/
-  /*  if (readCur2 == 0 && cur_key2 != 0 && cur_key2 < 8) { //if chip 2 key 1-3 is true
-      Serial.println(cur_key2 * 32, HEX);
-      cur_key2 = 0;
-    } else if (readCur2 == 0 && cur_key2 != 0 ) { //clear cur_key2
-      cur_key2 = 0;
-    }
-  */
-
-  /*if (readKey2 < min_key2 && readKey2 == 0) { //on release key   [left button,right button,space bar left and right]
-    release1 = true;
-    //  Serial.println(min_key2,HEX);
-    }
-    if (readKey < min_key && readKey == 0) { //on release key 1-8
-    release2 = true;
-    }*/
-  //---sending---//
+  //---sending or release key ---//
   sum_key = min_key2 + min_key;
   if (readKey2 == 0 && readKey == 0 && sum_key != 0) { // release two shift
     Serial.write(0xff);
@@ -453,7 +439,8 @@ void loop()
     // Serial.println("Max");
   }
 
-}
+} 
+//------------ bit mapping to braille unicode---------------
 byte bitMaping(byte data) {
   byte DataOutput = 0;
   byte bit_0 = bitRead(data, 0);

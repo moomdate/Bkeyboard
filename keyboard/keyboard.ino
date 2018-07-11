@@ -241,6 +241,8 @@ void SerialComm() {
       Serial.write(muteBeep(1));
     } else if (data == 148) {
       Serial.write(muteBeep(0));
+    }else if (data == 147) {
+      Serial.write(ReadStatusBeep());
     }
     data = 0;
   }

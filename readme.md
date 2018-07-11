@@ -19,3 +19,4 @@
                Output:beep
     dec:148 -> mute
                Output:beep beep
+    dec:147 -> Output: status mute

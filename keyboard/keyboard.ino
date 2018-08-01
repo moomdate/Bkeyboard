@@ -62,8 +62,9 @@ void setup()
   pinMode(13, OUTPUT); // sound
   pinMode(A0, INPUT); // volt value
   pinMode(A2, INPUT); // chart state
-  startSound();
+ 
   beep__ = ReadStatusBeep();
+  startSound();
 }
 void errorSound2() {
   fr(100, 90, 100);
@@ -251,6 +252,7 @@ void loop()
 {
   //top
   //Serial.println(voltV());
+  //startSound();
   chargStatBeepSound();
   SerialComm();
   //****************hight volt*****************
@@ -523,3 +525,4 @@ byte bitMap2(byte dataInput) {
   //  bitSet(dataOutput, 0);
   return dataOutput;
 }
+

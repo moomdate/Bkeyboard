@@ -17,7 +17,7 @@ int checkBatCharging = 0;
 int ccFill = 0;
 int arrayFofill[3];
 int timeCheck = 0;
-float min_ = 4.2, max_ = 0.0;
+float min_ = 4.21, max_ = 0.0;
 ////////////////////////////////////
 
 //--------keyboard and cursor -------
@@ -124,17 +124,18 @@ int voltV() {
   time_++;
   if (time_ > 300) {
     time_ = 0;
-    min_ = 4.2;
+    min_ = 4.22;
     max_ = 0.0;
   }
   if (min_ > vin)
     min_ = vin;
   if (max_ < vin)
     max_ = vin;
+    
   av = (min_ + max_) / 2.0;
   //av = map(2.7,4.2,0,4.2);
-  av = av - 2.7;
-  float percent = av * 100.0 / (4.19 - 2.7);
+  av = av - 2.75;
+  float percent = av * 100.0 / (4.21 - 2.75);
 
   return ceil(percent);
 }
@@ -337,7 +338,7 @@ void loop()
         Serial.write(leftJoy);
         Serial.write(rightJoy);
       }
-    } else if (stateReleaseHold != 2) {
+    } else if (stateReleaseHold != 2) {                                                                                                                                                                                                      
       Serial.write(0xff);
       Serial.write(0xff);
       Serial.write(0xa6);
@@ -525,4 +526,3 @@ byte bitMap2(byte dataInput) {
   //  bitSet(dataOutput, 0);
   return dataOutput;
 }
-

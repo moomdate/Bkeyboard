@@ -26,6 +26,11 @@ byte readKey2, readKey;
 byte readCur1, readCur2, readCur3, readCur4;
 byte leftShift, rightShitf;
 byte min_key = 0, min_key2 = 0;
+
+byte readKey_joy_r = 0, min_key_joy_r = 0, readKey_joy_l = 0, min_key_joy_l = 0;
+
+byte lastButtonState = 0;
+byte releaseJoyL = 0, releaseJoyR = 0;
 byte cur_key1 = 0, cur_key2 = 0, cur_key3 = 0, cur_key3_5 = 0 , cur_key4 = 0, release_cersor = 0;
 int sum_key = 0, sum_cursorkey1 = 0;
 int stateReleaseHold = 0;
@@ -63,7 +68,7 @@ void setup()
   pinMode(13, OUTPUT); // sound
   pinMode(A0, INPUT); // volt value
   pinMode(A2, INPUT); // chart state
- 
+
   beep__ = ReadStatusBeep();
   startSound();
 }
@@ -132,7 +137,7 @@ int voltV() {
     min_ = vin;
   if (max_ < vin)
     max_ = vin;
-    
+
   av = (min_ + max_) / 2.0;
   //av = map(2.7,4.2,0,4.2);
   av = av - 2.75;
@@ -244,7 +249,7 @@ void SerialComm() {
       Serial.write(muteBeep(1));
     } else if (data == 148) {
       Serial.write(muteBeep(0));
-    }else if (data == 147) {
+    } else if (data == 147) {
       Serial.write(ReadStatusBeep());
     }
     data = 0;
@@ -303,74 +308,35 @@ void loop()
   j1_3 == LOW ? bitSet(leftJoy, 0) :  bitClear(leftJoy, 0);
   j1_4 == LOW ? bitSet(leftJoy, 6) :  bitClear(leftJoy, 6);
   push_l == LOW ? bitSet(leftJoy, 4) :  bitClear(leftJoy, 4);
-  if (j2_1 == 0 || j2_2 == 0 || j2_3 == 0 || j2_4 == 0 || push_r == 0    || j1_1 == 0 || j1_2 == 0 || j1_3 == 0 || j1_4 == 0 || push_l == 0) {
-    timeCheck = 0;
-    stateReleaseHold = 0;
-    while (digitalRead(A_1) == 0 || digitalRead(B_1) == 0 || digitalRead(C_1) == 0 || digitalRead(D_1) == 0 || digitalRead(cen1) == 0) { //joystick right debounce
-      timeCheck++;
-      if (timeCheck > 140) {  // debounce switch
-        timeCheck = 0;
-        stateReleaseHold = 1;
-        break;
-      }
-      stateReleaseHold = 2;
-      delay(5);
+  if (j2_1 == 0 || j2_2 == 0 || j2_3 == 0 || j2_4 == 0 || push_r == 0 || j1_1 == 0 || j1_2 == 0 || j1_3 == 0 || j1_4 == 0 || push_l == 0) { // ถ้ามีการกด joy stick
+    //readKey2 = bitMap2(~Wire.read()); // แปลงค่า bit
+    if (leftJoy >= releaseJoyL) { // รอจำนวนปุ่มที่กดมากสุด
+      releaseJoyL = leftJoy;
     }
-    while (digitalRead(A_2) == 0 || digitalRead(B_2) == 0 || digitalRead(C_2) == 0 || digitalRead(D_2) == 0 || digitalRead(cen2) == 0) { //joystick left debounce
-      timeCheck++;
-      if (timeCheck > 140) { // debounce switch
-        timeCheck = 0;
-        stateReleaseHold = 1;
-        break;
-      }
-      stateReleaseHold = 2;
-      delay(5);
+     if (rightJoy >= releaseJoyR) { // รอจำนวนปุ่มที่กดมากสุด
+      releaseJoyR = rightJoy;
     }
-    if (stateReleaseHold) {
-      Serial.write(0xff);
-      Serial.write(0xff);
-      Serial.write(0xa6);
-      Serial.write(0x03);
-      Serial.write(00);
-      if (leftJoy == 01) {
-        Serial.write(rightJoy);
-        Serial.write(leftJoy);
-      } else {
-        Serial.write(leftJoy);
-        Serial.write(rightJoy);
-      }
-    } else if (stateReleaseHold != 2) {                                                                                                                                                                                                      
-      Serial.write(0xff);
-      Serial.write(0xff);
-      Serial.write(0xa6);
-      Serial.write(0x03);
-      Serial.write(00);
-      if (leftJoy == 01) {
-        Serial.write(rightJoy);
-        Serial.write(leftJoy);
-      } else {
-        Serial.write(leftJoy);
-        Serial.write(rightJoy);
-      }
-    }
-    previousMillis = currentMillis;
-    hiV = 1;
-
+    // releaseJoyL = leftJoy;
+    // releaseJoyR = rightJoy;
+    //timeCheck = 0;
+    //stateReleaseHold = 0;
+    //previousMillis = currentMillis;
+    //hiV = 1; //re charging hight volt
   }
-  Wire.requestFrom(32, 1); //top button //key 1 - 8
+  Wire.requestFrom(32, 1); //top button // key 1 - 8
   if (Wire.available())
   {
-    readKey = bitMaping(~Wire.read());
+    readKey = bitMaping(~Wire.read()); // แปลงค่า bit
     if (readKey >= min_key) {
       min_key = readKey;
     }//com
     //   Serial.println(data, HEX);
   }
-  Wire.requestFrom(33, 1); //bottom buttons ex. [left button,right button,space bar left and right]
+  Wire.requestFrom(33, 1); // bottom buttons ex. [left button,right button,space bar left and right]
   if (Wire.available())
   {
-    readKey2 = bitMap2(~Wire.read());
-    if (readKey2 >= min_key2) {
+    readKey2 = bitMap2(~Wire.read()); // แปลงค่า bit
+    if (readKey2 >= min_key2) { // รอจำนวนปุ่มที่กดมากสุด
       min_key2 = readKey2;
     }
   }
@@ -385,8 +351,6 @@ void loop()
       cur_key1 = readCur1;
     }
   }
-
-
   Wire.requestFrom(35, 1);
   if (Wire.available())
   {
@@ -395,7 +359,6 @@ void loop()
       cur_key2 = readCur2;
     }
   }
-
   Wire.requestFrom(36, 1);
   if (Wire.available())
   {
@@ -418,7 +381,7 @@ void loop()
     cur_key2 = 0;
   }
 
-  //release cursor key
+  // release cursor key
   sum_cursorkey1 = cur_key1 + cur_key2 * 32;
   if (readCur1 == 0 && readCur2 == 0 && sum_cursorkey1 != 0) { // set1 chip 1 and 2
     /* Serial.write(sum_cursorkey1);
@@ -467,26 +430,37 @@ void loop()
     hiV = 1;
     //------------------------------
   }
+  //-----------------end cursor key-------------------
+
+
   //---sending or release key ---//
-  sum_key = min_key2 + min_key;
-  if (readKey2 == 0 && readKey == 0 && sum_key != 0) { // release two shift
+
+  sum_key = min_key2 + min_key + releaseJoyL + releaseJoyR ; // เช็คว่ามีค่าส่งมาไหม โดยจะบวกกันให้มากกว่า 0
+  if ((readKey2 == 0 && readKey == 0 && sum_key != 0 && (j1_1 + j1_2 + j1_3 + j1_4 + push_l + j2_1 + j2_2 + j2_3 + j2_4 + push_r) == 10)) { // release 3 chip เช็คค่าว่ามีการปล่อยปุ่มและมีค่าส่งมาไหม
     Serial.write(0xff);
     Serial.write(0xff);
     Serial.write(0xa6);
     Serial.write(0x03);
-    Serial.write(min_key);
-    Serial.write(min_key2);
-    Serial.write(00);
+    Serial.write(min_key); // ปุ่ม 1-8
+    if (releaseJoyL == 01) {
+      Serial.write(releaseJoyR + min_key2); // จอยขวา + ปุ่ม space ,left button ,right button
+      Serial.write(releaseJoyL); // จอยขวา
+    } else {
+      Serial.write(releaseJoyL + min_key2); // จอยขวา + ปุ่ม space ,left button ,right buttone
+      Serial.write(releaseJoyR);  // จอยขวา
+    }
+
     min_key2 = 0;
     min_key = 0;
     sum_key = 0;
+    releaseJoyL = 0;
+    releaseJoyR = 0;
     //--------- hight volt ---------
     previousMillis = currentMillis;
     hiV = 1;
     //------------------------------
     // Serial.println("Max");
   }
-
 }
 //------------ bit mapping to braille unicode---------------
 byte bitMaping(byte data) {

@@ -87,6 +87,12 @@ void errorSound() {
 void beep() {
   fr(400, 90, 100);
 }
+void beep2() {
+  fr(300, 100, 180);
+}
+void beep3() {
+  fr(200, 120, 180);
+}
 void errorBreak() {
   fr(100, 90, 100);
   delay(60);
@@ -234,6 +240,10 @@ void SerialComm() {
     byte data = Serial.read();
     if (data == 155) {
       errorSound();
+    } else if (data == 157) {
+      beep3();
+    } else if (data == 156) {
+      beep2();
     } else if (data == 154) {
       beep();
     } else if (data == 153) {
@@ -313,7 +323,7 @@ void loop()
     if (leftJoy >= releaseJoyL) { // รอจำนวนปุ่มที่กดมากสุด
       releaseJoyL = leftJoy;
     }
-     if (rightJoy >= releaseJoyR) { // รอจำนวนปุ่มที่กดมากสุด
+    if (rightJoy >= releaseJoyR) { // รอจำนวนปุ่มที่กดมากสุด
       releaseJoyR = rightJoy;
     }
     // releaseJoyL = leftJoy;

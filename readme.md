@@ -8,6 +8,9 @@
  - Check percent battery ผ่านทาง Serial1 `0x96`
 
 #### Serial Command 
+    dec:158	-> Output:error 
+    dec:157	-> Output:beep 
+    dec:156	-> Output:beep 
     dec:155	-> Output:beep beep
     dec:154	-> Output:beep
     dec:153 -> Output:beeeep beeep (เสียงต่ำ)

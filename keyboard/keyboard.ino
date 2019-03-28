@@ -93,6 +93,11 @@ void beep2() {
 void beep3() {
   fr(200, 120, 180);
 }
+void errorRRR() {
+  fr(300, 500, 300);
+  delay(120);
+
+}
 void errorBreak() {
   fr(100, 90, 100);
   delay(60);
@@ -240,7 +245,9 @@ void SerialComm() {
     byte data = Serial.read();
     if (data == 155) {
       errorSound();
-    } else if (data == 157) {
+    } else if (data == 158) {
+      errorRRR();
+    }else if (data == 157) {
       beep3();
     } else if (data == 156) {
       beep2();
@@ -249,7 +256,7 @@ void SerialComm() {
     } else if (data == 153) {
       beepbeep();
     } else if (data == 152) {
-      errorSound2();
+      errorSound2(); //
     } else if (data == 151) {
       errorBreak();
     } else if (data == 150) { //battery

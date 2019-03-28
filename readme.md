@@ -7,6 +7,8 @@
  - Sleep High Volt เมื่อไม่มีการรับ Input เกิน 1 นาที และ re charge Hight volt 3 วินาที
  - Check percent battery ผ่านทาง Serial1 `0x96`
 
+video
+[![video](https://i9.ytimg.com/vi/IMHQPM_KGXg/hqdefault.jpg?sqp=CIDo8OQF&rs=AOn4CLC4gJymvFQzqcBKKfNAbUHDrKyNuw)](https://youtu.be/IMHQPM_KGXg)
 #### Serial Command 
     dec:158	-> Output:error 
     dec:157	-> Output:beep 

@@ -1,3 +1,7 @@
+//
+//
+//
+//
 #include <Wire.h>
 #include <EEPROM.h>
 int A_1 = 4;
@@ -18,6 +22,10 @@ int checkBatCharging = 0;
 int ccFill = 0;
 int arrayFofill[3];
 int timeCheck = 0;
+int voltV;
+float vin, p;
+float lowpass;
+
 float min_ = 4.21, max_ = 0.0;
 ////////////////////////////////////
 
@@ -132,30 +140,7 @@ void fr(int gg, int cc, int fg) {
   }
 }
 //----------analog volt to percent------------
-int voltV() {
-  float vin;
-  float av = 0.0;
-  vin = analogRead(A0);
-  vin = vin * 5.0;
-  vin = (vin / 1023) * 3.0;
-  time_++;
-  if (time_ > 300) {
-    time_ = 0;
-    min_ = 4.22;
-    max_ = 0.0;
-  }
-  if (min_ > vin)
-    min_ = vin;
-  if (max_ < vin)
-    max_ = vin;
 
-  av = (min_ + max_) / 2.0;
-  //av = map(2.7,4.2,0,4.2);
-  av = av - 2.75;
-  float percent = av * 100.0 / (4.21 - 2.75);
-
-  return ceil(percent);
-}
 //------- beep when charging and unplug------------
 void chargStatBeepSound() {
   float gg = analogRead(A2);  //check charging
@@ -247,7 +232,7 @@ void SerialComm() {
       errorSound();
     } else if (data == 158) {
       errorRRR();
-    }else if (data == 157) {
+    } else if (data == 157) {
       beep3();
     } else if (data == 156) {
       beep2();
@@ -260,7 +245,7 @@ void SerialComm() {
     } else if (data == 151) {
       errorBreak();
     } else if (data == 150) { //battery
-      Serial.write(voltV());
+      Serial.write(voltV);
       //Serial.write(0xFA);
     } else if (data == 149) {
       Serial.write(muteBeep(1));
@@ -272,11 +257,16 @@ void SerialComm() {
     data = 0;
   }
 }
+void readVoltage() {
+
+  vin = (float)analogRead(0) * 5;
+  vin = (vin / 1024) * 3.059;
+  lowpass = 0.945 * lowpass + 0.05498 * vin;
+  voltV = (lowpass - 2.75) * 100.0 / (4.19 - 2.75);
+}
 void loop()
 {
-  //top
-  //Serial.println(voltV());
-  //startSound();
+  readVoltage();
   chargStatBeepSound();
   SerialComm();
   //****************hight volt*****************
@@ -293,7 +283,6 @@ void loop()
     }
   }
   digitalWrite(HV_en, hiV);
-
   byte rightJoy = 0, leftJoy = 0;
   /* Serial.print(digitalRead(A_1)); //ขึ้น
     Serial.print(" ");
